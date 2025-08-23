@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.dependencies import SellerServiceDep
 from app.schemas.seller import CreateSeller, ReadSeller
 
+
 seller_router = APIRouter(prefix="/seller", tags=['Sellers'])
 
 

@@ -1,15 +1,14 @@
-from datetime import datetime, timedelta
 from fastapi import HTTPException, status
-import jwt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.models import Seller
 from app.schemas.seller import CreateSeller
 
-from app.config import security_settings
 
 from passlib.context import CryptContext
+
+from app.utils import generate_access_token
 
 password_context = CryptContext(schemes=["bcrypt"])
 
@@ -34,21 +33,17 @@ class SellerService:
         result = await self.session.execute(select(Seller).where(Seller.email == email))
         seller = result.scalar()
 
+        print(seller)
         if seller is None or password_context.verify(password, seller.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Email or password is incorrect"
             )
 
-        token = jwt.encode(
-            payload={
-                "user": {
-                    "name": seller.name,
-                    "email": seller.email
-                },
-                "exp": datetime.now()+timedelta(days=1)
-            },
-            algorithm=security_settings.JWT_ALGORITHM,
-            key=security_settings.JWT_SECRET
-        )
+        token = generate_access_token(data={
+            "user": {
+                "name": seller.name,
+                "id": seller.id
+            }
+        })
         return token
