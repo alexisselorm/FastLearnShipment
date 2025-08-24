@@ -33,17 +33,16 @@ class SellerService:
         result = await self.session.execute(select(Seller).where(Seller.email == email))
         seller = result.scalar()
 
-        print(seller)
-        if seller is None or password_context.verify(password, seller.password_hash):
+        if seller is None or not password_context.verify(password, seller.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Email or password is incorrect"
             )
-
+        print("here")
         token = generate_access_token(data={
             "user": {
                 "name": seller.name,
-                "id": seller.id
+                "id": str(seller.id)
             }
         })
         return token

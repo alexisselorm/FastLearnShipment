@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
 from app.api.dependencies import SellerDep, ShipmentServiceDep
@@ -20,7 +21,7 @@ async def get_all_shipments(service: ShipmentServiceDep):
 
 
 @shipment_router.get("/{id}", response_model=GetShipment)
-async def shipment(id: int, service: ShipmentServiceDep):
+async def shipment(id: UUID, service: ShipmentServiceDep):
 
     shipment = await service.get(id)
     if not shipment:
@@ -33,16 +34,16 @@ async def shipment(id: int, service: ShipmentServiceDep):
 
 # Create a new shipment with
 @shipment_router.post("/")
-async def create_shipment(_: SellerDep, body: CreateShipment, service: ShipmentServiceDep):
+async def create_shipment(seller: SellerDep, body: CreateShipment, service: ShipmentServiceDep):
 
-    shipment = await service.add(body)
+    shipment = await service.add(body, seller)
 
     return {"id": shipment.id}
 
 
 # Update
 @shipment_router.patch("/", response_model=GetShipment)
-async def update_shipment(id: int, body: UpdateShipment, service: ShipmentServiceDep):
+async def update_shipment(id: UUID, body: UpdateShipment, service: ShipmentServiceDep):
     update = body.model_dump(exclude_none=True)
     if not update:
         raise HTTPException(
@@ -56,7 +57,7 @@ async def update_shipment(id: int, body: UpdateShipment, service: ShipmentServic
 
 
 @shipment_router.delete("/{id}")
-async def delete_shipment(id: int, service: ShipmentServiceDep):
+async def delete_shipment(id: UUID, service: ShipmentServiceDep):
 
     await service.delete(id)
 
