@@ -3,7 +3,8 @@ from fastapi import HTTPException, status
 
 from app.utils import decode_access_token
 
-oauth2scheme = OAuth2PasswordBearer(tokenUrl="/seller/token")
+oauth2scheme_seller = OAuth2PasswordBearer(tokenUrl="/seller/token")
+oauth2scheme_partner = OAuth2PasswordBearer(tokenUrl="/partner/token")
 
 
 class AccesstokenBearer(HTTPBearer):
