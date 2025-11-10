@@ -8,14 +8,14 @@ from app.schemas.seller import CreateSeller
 
 from passlib.context import CryptContext
 
-from app.utils import generate_access_token
+from .user import UserService
 
 password_context = CryptContext(schemes=["bcrypt"])
 
 
-class SellerService:
+class SellerService(UserService):
     def __init__(self, session: AsyncSession):
-        self.session = session
+        super().__init__(Seller, session)
 
     async def get(self, user_id: str):
         result = await self.session.execute(select(Seller).where(Seller.id == user_id))
@@ -28,31 +28,9 @@ class SellerService:
         return seller
 
     async def add(self, credentials: CreateSeller):
-        seller = Seller(
-            **credentials.model_dump(),
-            password_hash=password_context.hash(credentials.password)
-        )
-
-        self.session.add(seller)
-        await self.session.commit()
-        await self.session.refresh(seller)
-        return seller
+        return await self._add_user(credentials.model_dump())
 
     async def token(self, email, password) -> str:
         # Validate the credentials
-        result = await self.session.execute(select(Seller).where(Seller.email == email))
-        seller = result.scalar()
-
-        if seller is None or not password_context.verify(password, seller.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Email or password is incorrect"
-            )
-        print("here")
-        token = generate_access_token(data={
-            "user": {
-                "name": seller.name,
-                "id": str(seller.id)
-            }
-        })
+        token = await self._generate_token(email, password)
         return token
