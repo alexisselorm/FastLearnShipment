@@ -17,6 +17,16 @@ class SellerService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    async def get(self, user_id: str):
+        result = await self.session.execute(select(Seller).where(Seller.id == user_id))
+        seller = result.scalar()
+        if seller is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Seller not found"
+            )
+        return seller
+
     async def add(self, credentials: CreateSeller):
         seller = Seller(
             **credentials.model_dump(),

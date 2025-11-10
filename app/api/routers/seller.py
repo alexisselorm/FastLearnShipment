@@ -10,6 +10,17 @@ from app.schemas.seller import CreateSeller, ReadSeller
 seller_router = APIRouter(prefix="/seller", tags=['Sellers'])
 
 
+@seller_router.get("/me", response_model=ReadSeller)
+async def read_seller(token_data: Annotated[dict, Depends(get_seller_access_token)], service: SellerServiceDep):
+    # The user's ID is nested inside the 'user' dictionary in the token
+    user_id = token_data['user']['id']
+
+    # Fetch the actual seller from the database using the correct ID
+    seller = await service.get(user_id)
+
+    return seller
+
+
 @seller_router.post("/signup", response_model=ReadSeller)
 async def create_seller(seller: CreateSeller, service: SellerServiceDep):
     seller = await service.add(seller)

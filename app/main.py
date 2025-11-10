@@ -8,6 +8,7 @@ from scalar_fastapi import get_scalar_api_reference
 from .database.session import create_db_tables
 
 from .api.router import all_routers
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @asynccontextmanager
@@ -19,6 +20,16 @@ async def lifespan_handler(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan_handler)
+
+
+# Add cors here
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(all_routers)
 
