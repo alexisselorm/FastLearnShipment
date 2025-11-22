@@ -1,20 +1,22 @@
 from datetime import datetime, timedelta
 from uuid import UUID
-
+from fastapi import HTTPException, status
 from sqlalchemy import select
-from app.database.models import Seller, Shipment
-from app.schemas.shipment import CreateShipment, ShipmentStatus
+from app.database.models import DeliveryPartner, Seller, Shipment
+from app.schemas.shipment import CreateShipment, ShipmentStatus, UpdateShipment
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.delivery_partner import DeliveryPartnerService
+from app.services.shipment_event import ShipmentEventService
 
 from .base import BaseService
 
 
 class ShipmentService(BaseService):
-    def __init__(self, session: AsyncSession, partner_service: DeliveryPartnerService):
+    def __init__(self, session: AsyncSession, partner_service: DeliveryPartnerService, event_service: ShipmentEventService):
         super().__init__(Shipment, session)
         self.partner_service = partner_service
+        self.event_service = event_service
 
     async def get_all(self):
         result = await self.session.execute(select(Shipment))
@@ -33,12 +35,52 @@ class ShipmentService(BaseService):
 
         partner = await self.partner_service.assign_shipment(shipment)
         shipment.delivery_partner_id = partner.id
-        return await self._add(shipment)
+        new_shipment = await self._add(shipment)
 
-    async def update(self, id: UUID, shipment_update: dict):
+        new_event = await self.event_service.add(shipment=new_shipment.id,
+                                                 location=seller.zip_code,
+                                                 status=ShipmentStatus.placed,)
+        shipment.timeline.append(new_event)
+
+        return new_shipment
+
+    async def update(self, id: UUID, shipment_update: UpdateShipment, delivery_partner: DeliveryPartner):
         shipment = await self.get(id)
-        shipment.sqlmodel_update(shipment_update)
+        if shipment.delivery_partner_id != delivery_partner.id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="You are not authorized to update this shipment"
+            )
+        update = shipment_update.model_dump(exclude_none=True)
+        shipment.sqlmodel_update(shipment_update, exclude_none=True)
 
+        if shipment_update.estimated_delivery:
+            shipment.estimated_delivery = shipment_update.estimated_delivery
+
+        if len(update) > 1 or not shipment_update.estimated_delivery:
+            await self.event_service.add(shipment=shipment,
+                                         **update)
+
+        return await self._update(shipment)
+
+    async def cancel(self, id: UUID, seller: Seller):
+        shipment = await self.get(id)
+        if shipment.seller_id != seller.id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="You are not authorized to cancel this shipment"
+            )
+        if shipment.status == ShipmentStatus.delivered:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Delivered shipments cannot be cancelled"
+            )
+        shipment.status = ShipmentStatus.cancelled
+        new_event = await self.event_service.add(shipment=shipment,
+                                                 status=ShipmentStatus.cancelled,
+                                                 location=seller.zip_code,
+                                                 description="Shipment cancelled by seller")
+        shipment.timeline.append(new_event)
         return await self._update(shipment)
 
     async def delete(self, id: UUID) -> None:

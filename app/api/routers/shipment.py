@@ -1,7 +1,8 @@
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, status
 
-from app.api.dependencies import DeliveryPartnerDep, SellerDep, ShipmentServiceDep
+from app.api.dependencies import SellerDep, ShipmentServiceDep
+from app.database.models import DeliveryPartner
 from app.schemas.shipment import CreateShipment, GetShipment, UpdateShipment
 
 shipment_router = APIRouter(prefix="/shipment",
@@ -43,22 +44,22 @@ async def create_shipment(seller: SellerDep, body: CreateShipment, service: Ship
 
 # Update
 @shipment_router.patch("/", response_model=GetShipment)
-async def update_shipment(id: UUID, body: UpdateShipment, partner: DeliveryPartnerDep, service: ShipmentServiceDep):
-    update = body.model_dump(exclude_none=True)
+async def update_shipment(id: UUID, shipment_update: UpdateShipment, partner: DeliveryPartner, service: ShipmentServiceDep):
+    update = shipment_update.model_dump(exclude_none=True)
     if not update:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No data provided to update"
         )
 
-    shipment = await service.update(id, update)
+    shipment = await service.update(id, shipment_update, partner)
 
     return shipment
 
 
-@shipment_router.delete("/{id}")
-async def delete_shipment(id: UUID, service: ShipmentServiceDep):
+@shipment_router.post("/cancel", response_model=GetShipment)
+async def cancel_shipment(id: UUID, seller: SellerDep, service: ShipmentServiceDep):
 
-    await service.delete(id)
+    return await service.cancel(id, seller)
 
     return {"detail": f"Ship with id {id} has been deleted"}

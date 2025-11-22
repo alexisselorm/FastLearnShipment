@@ -24,7 +24,7 @@ class UserService(BaseService):
 
     async def _get_by_email(self, email: str) -> User | None:
         return await self.session.scalar(
-            select(User).where(User.email == email)
+            select(self.model).where(self.model.email == email)
         )
 
     async def _generate_token(self, email, password) -> str:

@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column
-from app.schemas.shipment import ShipmentStatus
+from app.schemas.enums import ShipmentStatus
 from sqlalchemy.dialects import postgresql
 
 
@@ -14,7 +14,6 @@ class Shipment(SQLModel, table=True):
     content: str
     weight: float = Field(le=25)
     destination: int
-    status: ShipmentStatus
     estimated_delivery: datetime
 
     seller_id: UUID = Field(foreign_key="sellers.id")
@@ -27,6 +26,28 @@ class Shipment(SQLModel, table=True):
     created_at: datetime = Field(sa_column=Column(
         postgresql.TIMESTAMP(), default=datetime.now
     ))
+
+    timeline: list["ShipmentEvent"] = Relationship(back_populates="shipment",
+                                                   sa_relationship_kwargs={"lazy": "selectin"})
+
+    @property
+    def status(self):
+        return self.timeline[-1].status if len(self.timeline) > 0 else None
+
+
+class ShipmentEvent(SQLModel, table=True):
+    __tablename__ = "shipment_events"
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    created_at: datetime = Field(sa_column=Column(
+        postgresql.TIMESTAMP(), default=datetime.now))
+    location: int
+    status: ShipmentStatus
+    description: str | None = Field(default=None)
+    shipment_id: UUID = Field(foreign_key="shipments.id")
+
+    shipment: Shipment = Relationship(back_populates="timeline",
+                                      sa_relationship_kwargs={"lazy": "selectin"})
 
 
 class User(SQLModel):
@@ -47,6 +68,9 @@ class Seller(User, table=True):
         postgresql.TIMESTAMP(), default=datetime.now
     ))
 
+    address: str | None = Field(default=None)
+    zip_code: int | None = Field(default=None)
+
 
 class DeliveryPartner(User, table=True):
     __tablename__ = "delivery_partners"
@@ -65,7 +89,7 @@ class DeliveryPartner(User, table=True):
 
     @property
     def active_shipments(self):
-        return [shipment for shipment in self.shipments if shipment.status != ShipmentStatus.delivered]
+        return [shipment for shipment in self.shipments if shipment.status != ShipmentStatus.delivered or shipment.status != ShipmentStatus.cancelled]
 
     @property
     def current_handling_capacity(self):

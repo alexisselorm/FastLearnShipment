@@ -7,7 +7,7 @@ class BaseDeliveryPartner(BaseModel):
 
     name: str
     email: EmailStr
-    serviceable_zip_codes: list[int]
+    serviceable_zipcodes: list[int]
     max_handling_capacity: int
 
 
@@ -21,7 +21,7 @@ class LoginDeliveryPartner(BaseModel):
 
 
 class UpdateDeliveryPartner(BaseModel):
-    serviceable_zip_codes: list[int] | None = Field(default=None)
+    serviceable_zipcodes: list[int] | None = Field(default=None)
     max_handling_capacity: int | None = Field(default=None)
 
 
