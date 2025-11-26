@@ -61,5 +61,3 @@ async def update_shipment(id: UUID, shipment_update: UpdateShipment, partner: De
 async def cancel_shipment(id: UUID, seller: SellerDep, service: ShipmentServiceDep):
 
     return await service.cancel(id, seller)
-
-    return {"detail": f"Ship with id {id} has been deleted"}

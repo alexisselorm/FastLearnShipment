@@ -3,7 +3,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import oauth2scheme_seller, oauth2scheme_partner
@@ -55,8 +55,8 @@ async def get_current_partner(token_data: Annotated[dict, Depends(get_partner_ac
     return partner
 
 
-def get_shipment_service(session: SessionDep):
-    return ShipmentService(session, DeliveryPartnerService(session), ShipmentEventService(session))
+def get_shipment_service(session: SessionDep, tasks: BackgroundTasks):
+    return ShipmentService(session, DeliveryPartnerService(session), ShipmentEventService(session, tasks))
 
 
 def get_delivery_partner_service(session: SessionDep):

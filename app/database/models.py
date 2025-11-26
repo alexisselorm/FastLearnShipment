@@ -15,6 +15,8 @@ class Shipment(SQLModel, table=True):
     weight: float = Field(le=25)
     destination: int
     estimated_delivery: datetime
+    client_contact_email: EmailStr
+    client_contact_phone: str | None
 
     seller_id: UUID = Field(foreign_key="sellers.id")
     seller: "Seller" = Relationship(

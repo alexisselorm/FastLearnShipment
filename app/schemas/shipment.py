@@ -1,7 +1,7 @@
 from datetime import datetime
 from random import randint
 from uuid import UUID
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 from app.database.models import ShipmentEvent
@@ -32,7 +32,8 @@ class GetShipment(BaseShipment):
 
 
 class CreateShipment(BaseShipment):
-    pass
+    client_contact_email: EmailStr
+    client_contact_phone: str | None = Field(default=None)
 
 
 class UpdateShipment(BaseModel):
