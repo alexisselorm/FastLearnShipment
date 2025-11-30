@@ -24,6 +24,12 @@ async def login_delivery_partner(request_form: Annotated[OAuth2PasswordRequestFo
     return {"access_token": token, "type": "jwt"}
 
 
+@delivery_partner_router.get("/verify")
+async def verify_seller_email(token: str, service: DeliveryPartnerServiceDep):
+    seller = await service.verify_email(token)
+    return {"detail": "Email verified successfully", "seller_id": str(seller.id)}
+
+
 @delivery_partner_router.post("/", response_model=ReadDeliveryPartner)
 async def update_delivery_partner(
     partner_update: UpdateDeliveryPartner,

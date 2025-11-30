@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import BackgroundTasks, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,8 +14,8 @@ password_context = CryptContext(schemes=["bcrypt"])
 
 
 class SellerService(UserService):
-    def __init__(self, session: AsyncSession):
-        super().__init__(Seller, session)
+    def __init__(self, session: AsyncSession, tasks: BackgroundTasks):
+        super().__init__(Seller, session, tasks)
 
     async def get(self, user_id: str):
         result = await self.session.execute(select(Seller).where(Seller.id == user_id))
@@ -28,7 +28,7 @@ class SellerService(UserService):
         return seller
 
     async def add(self, credentials: CreateSeller):
-        return await self._add_user(credentials.model_dump())
+        return await self._add_user(credentials.model_dump(), router_prefix="seller")
 
     async def token(self, email, password) -> str:
         # Validate the credentials

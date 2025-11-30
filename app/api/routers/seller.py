@@ -21,6 +21,12 @@ async def read_seller(token_data: Annotated[dict, Depends(get_seller_access_toke
     return seller
 
 
+@seller_router.get("/verify")
+async def verify_seller_email(token: str, service: SellerServiceDep):
+    seller = await service.verify_email(token)
+    return {"detail": "Email verified successfully", "seller_id": str(seller.id)}
+
+
 @seller_router.post("/signup", response_model=ReadSeller)
 async def create_seller(seller: CreateSeller, service: SellerServiceDep):
     seller = await service.add(seller)

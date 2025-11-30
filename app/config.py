@@ -10,6 +10,14 @@ _base_config = SettingsConfigDict(
 )
 
 
+class AppSettings(BaseSettings):
+    APP_NAME: str = "FastLearn"
+    APP_VERSION: str = "0.1.0"
+    APP_DOMAIN: str = "localhost:8000"
+
+    model_config = _base_config
+
+
 class DatabaseSettings(BaseSettings):
     POSTGRES_DB: str
     POSTGRES_USER: str
@@ -54,3 +62,4 @@ class MailSettings(BaseSettings):
 settings = DatabaseSettings()
 security_settings = SecuritySettings()
 mail_settings = MailSettings()
+app_settings = AppSettings()

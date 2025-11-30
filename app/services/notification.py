@@ -13,6 +13,7 @@ class NotificationService(BaseService):
             ConnectionConfig(
                 **mail_settings.model_dump(),
                 TEMPLATE_FOLDER=TEMPLATES_DIR
+                # TEMPLATE_FOLDER="/home/rm_rf_master/Documents/Learning/FastLearn/app/templates",
             )
         )
 
@@ -26,13 +27,17 @@ class NotificationService(BaseService):
         self.tasks.add_task(self.fastmail.send_message, message)
 
     async def send_templated_email(self, subject: str, recipients: list[EmailStr], template_name: str, context: dict):
+        print("Sending templated email to:")
+        print(recipients)
+        print(TEMPLATES_DIR)
         message = MessageSchema(
             subject=subject,
             recipients=recipients,
-            template_body=context,
+            context=context,
             template_name=template_name,
             subtype=MessageType.html,
         )
+
         self.tasks.add_task(
             self.fastmail.send_message,
             message,
