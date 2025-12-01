@@ -14,13 +14,13 @@ TEMPLATES_DIR = APP_DIR.joinpath("templates")
 _serializer = URLSafeTimedSerializer(secret_key=security_settings.JWT_SECRET)
 
 
-def generate_url_safe_token(token: str) -> dict | None:
-    return _serializer.dumps(token)
+def generate_url_safe_token(token: str, salt: str | None = None) -> dict | None:
+    return _serializer.dumps(token, salt=salt)
 
 
-def decode_url_safe_token(token: str, expiry: timedelta | None = None) -> dict | None:
+def decode_url_safe_token(token: str, salt: str | None = None, expiry: timedelta | None = None) -> dict | None:
     try:
-        return _serializer.loads(token, max_age=expiry.total_seconds() if expiry else None)
+        return _serializer.loads(token, salt=salt, max_age=expiry.total_seconds() if expiry else None)
     except (BadSignature, SignatureExpired):
         return None
 

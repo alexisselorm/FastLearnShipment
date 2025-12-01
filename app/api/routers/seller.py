@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import EmailStr
 
 from app.api.dependencies import SellerServiceDep, get_seller_access_token
 from app.database.redis import add_jti_to_blacklist
@@ -25,6 +26,18 @@ async def read_seller(token_data: Annotated[dict, Depends(get_seller_access_toke
 async def verify_seller_email(token: str, service: SellerServiceDep):
     seller = await service.verify_email(token)
     return {"detail": "Email verified successfully", "seller_id": str(seller.id)}
+
+
+@seller_router.get("/forgot_password")
+async def forgot_password(email: EmailStr, service: SellerServiceDep):
+    seller = await service.send_password_reset_link(email, seller_router.prefix)
+    return {"detail": "Check email for password reset link", "seller_id": str(seller.id)}
+
+
+@seller_router.get("/reset_password")
+async def reset_password(token: str, password: str, service: SellerServiceDep):
+    seller = await service.reset_password(token, password)
+    return {"detail": "Password reset successful", "seller_id": str(seller.id)}
 
 
 @seller_router.post("/signup", response_model=ReadSeller)

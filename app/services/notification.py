@@ -34,7 +34,6 @@ class NotificationService(BaseService):
             subject=subject,
             recipients=recipients,
             template_body=context,
-            template_name=template_name,
             subtype=MessageType.html,
         )
 
