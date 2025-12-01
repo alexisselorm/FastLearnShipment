@@ -51,9 +51,15 @@ class UserService(BaseService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid or expired token"
             )
-        user = self._get(UUID(payload["id"]))
+        user = await self._get(UUID(payload["id"]))
+        if user.email_verified:
+            raise HTTPException(
+                detail="Your email has already been verified",
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
         user.email_verified = True
         await self._update(user)
+        return user
 
     async def _generate_token(self, email, password) -> str:
         # Validate the credentials

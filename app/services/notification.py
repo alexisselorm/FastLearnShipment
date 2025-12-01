@@ -33,7 +33,7 @@ class NotificationService(BaseService):
         message = MessageSchema(
             subject=subject,
             recipients=recipients,
-            context=context,
+            template_body=context,
             template_name=template_name,
             subtype=MessageType.html,
         )
@@ -41,4 +41,5 @@ class NotificationService(BaseService):
         self.tasks.add_task(
             self.fastmail.send_message,
             message,
+            template_name=template_name
         )
