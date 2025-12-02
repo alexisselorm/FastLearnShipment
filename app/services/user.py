@@ -45,7 +45,7 @@ class UserService(BaseService):
         )
 
     async def verify_email(self, token: str):
-        payload = decode_url_safe_token(token)
+        payload = decode_url_safe_token(token, expiry=timedelta(days=1))
 
         if payload is None:
             raise HTTPException(
@@ -53,6 +53,11 @@ class UserService(BaseService):
                 detail="Invalid or expired token"
             )
         user = await self._get(UUID(payload["id"]))
+        if not user:
+            raise HTTPException(
+                detail="User not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
         if user.email_verified:
             raise HTTPException(
                 detail="Your email has already been verified",

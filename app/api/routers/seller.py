@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
 
@@ -41,9 +41,17 @@ async def reset_password(token: str, password: str, service: SellerServiceDep):
 
 
 @seller_router.post("/signup", response_model=ReadSeller)
-async def create_seller(seller: CreateSeller, service: SellerServiceDep):
-    seller = await service.add(seller)
-    return seller
+async def create_seller(create_seller: CreateSeller, service: SellerServiceDep):
+    seller = await service._get_by_email(create_seller.email)
+    print("Printing existing seller:")
+    print(seller)
+    if seller:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="User with this email already exists"
+        )
+    res = await service.add(create_seller)
+    return res
 
 
 @seller_router.post("/token")

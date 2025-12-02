@@ -28,6 +28,8 @@ class SellerService(UserService):
         return seller
 
     async def add(self, credentials: CreateSeller):
+        print("Adding new seller with credentials:")
+        print(credentials)
         return await self._add_user(credentials.model_dump(), router_prefix="seller")
 
     async def token(self, email, password) -> str:
