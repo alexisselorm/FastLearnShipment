@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.api.dependencies import SellerDep, ShipmentServiceDep
 from app.database.models import DeliveryPartner
-from app.schemas.shipment import CreateShipment, GetShipment, UpdateShipment
+from app.schemas.shipment import CreateShipment, GetShipment, ShipmentReview, UpdateShipment
 from app.utils import TEMPLATES_DIR
 
 shipment_router = APIRouter(prefix="/shipment",
@@ -89,3 +89,11 @@ async def update_shipment(id: UUID, shipment_update: UpdateShipment, partner: De
 async def cancel_shipment(id: UUID, seller: SellerDep, service: ShipmentServiceDep):
 
     return await service.cancel(id, seller)
+
+
+# Reviews
+@shipment_router.post("/review")
+async def review_shipment(token: str, review_data: ShipmentReview, service: ShipmentServiceDep):
+    await service.rate(token, review_data)
+
+    return {"detail": "Review added successfully."}

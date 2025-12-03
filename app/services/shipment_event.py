@@ -6,6 +6,8 @@ from app.database.redis import add_shipment_verification_code
 from app.schemas.shipment import ShipmentStatus
 from app.services.base import BaseService
 from app.services.notification import NotificationService
+from app.config import app_settings
+from app.utils import generate_url_safe_token
 
 
 class ShipmentEventService(BaseService):
@@ -64,10 +66,12 @@ class ShipmentEventService(BaseService):
 
             case ShipmentStatus.DELIVERED:
                 subject = "Your shipment has been delivered 🛳"
+                token = generate_url_safe_token({"id": str(shipment.id)})
                 context = {
                     "shipment_id": shipment.id,
                     "seller": shipment.seller.name,
-                    "delivery_partner": shipment.delivery_partner.name
+                    "delivery_partner": shipment.delivery_partner.name,
+                    "review_url": f"https://{app_settings.APP_DOMAIN}/shipment/review/?token={token}"
                 },
                 template_name = "mail_delivered.html"
             case ShipmentStatus.CANCELLED:

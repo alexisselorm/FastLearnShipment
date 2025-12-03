@@ -6,6 +6,21 @@ from app.schemas.enums import ShipmentStatus
 from sqlalchemy.dialects import postgresql
 
 
+class ShipmentEvent(SQLModel, table=True):
+    __tablename__ = "shipment_events"
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    created_at: datetime = Field(sa_column=Column(
+        postgresql.TIMESTAMP(), default=datetime.now))
+    location: int
+    status: ShipmentStatus
+    description: str | None = Field(default=None)
+    shipment_id: UUID = Field(foreign_key="shipments.id")
+
+    shipment: "Shipment" = Relationship(back_populates="timeline",
+                                        sa_relationship_kwargs={"lazy": "selectin"})
+
+
 class Shipment(SQLModel, table=True):
     __tablename__ = "shipments"
 
@@ -32,24 +47,12 @@ class Shipment(SQLModel, table=True):
     timeline: list["ShipmentEvent"] = Relationship(back_populates="shipment",
                                                    sa_relationship_kwargs={"lazy": "selectin"})
 
+    review: "Review" | None = Relationship(
+        back_populates="shipment", sa_relationship_kwargs={"lazy": "selectin"})
+
     @property
     def status(self):
         return self.timeline[-1].status if len(self.timeline) > 0 else None
-
-
-class ShipmentEvent(SQLModel, table=True):
-    __tablename__ = "shipment_events"
-    id: UUID = Field(sa_column=Column(
-        type_=postgresql.UUID, primary_key=True, default=uuid4))
-    created_at: datetime = Field(sa_column=Column(
-        postgresql.TIMESTAMP(), default=datetime.now))
-    location: int
-    status: ShipmentStatus
-    description: str | None = Field(default=None)
-    shipment_id: UUID = Field(foreign_key="shipments.id")
-
-    shipment: Shipment = Relationship(back_populates="timeline",
-                                      sa_relationship_kwargs={"lazy": "selectin"})
 
 
 class User(SQLModel):
@@ -97,3 +100,20 @@ class DeliveryPartner(User, table=True):
     @property
     def current_handling_capacity(self):
         return self.max_handling_capacity - len(self.active_shipments())
+
+
+class Review(SQLModel, table=True):
+    __tablename__ = "reviews"
+
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    rating: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None)
+    created_at: datetime = Field(sa_column=Column(
+        postgresql.TIMESTAMP(), default=datetime.now
+    ))
+
+    shipment_id: UUID = Field(foreign_key="shipments.id")
+    shipment: Shipment = Relationship(
+        back_populates="review",
+        sa_relationship_kwargs={"lazy": "selectin"})
