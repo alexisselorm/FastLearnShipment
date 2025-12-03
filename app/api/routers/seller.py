@@ -43,8 +43,6 @@ async def reset_password(token: str, password: str, service: SellerServiceDep):
 @seller_router.post("/signup", response_model=ReadSeller)
 async def create_seller(create_seller: CreateSeller, service: SellerServiceDep):
     seller = await service._get_by_email(create_seller.email)
-    print("Printing existing seller:")
-    print(seller)
     if seller:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
