@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from app.database.models import DeliveryPartner, Seller, Shipment
+from app.database.redis import get_shipment_verification_code
 from app.schemas.shipment import CreateShipment, ShipmentStatus, UpdateShipment
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,7 +52,18 @@ class ShipmentService(BaseService):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="You are not authorized to update this shipment"
             )
-        update = shipment_update.model_dump(exclude_none=True)
+
+        if shipment.status == ShipmentStatus.delivered:
+            code = await get_shipment_verification_code(shipment.id)
+
+            if not shipment_update.verification_code or str(shipment_update.verification_code) != str(code):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Client not authorized to receive the shipment without a valid verification code"
+                )
+
+        update = shipment_update.model_dump(exclude_none=True,
+                                            exclude=["verification_code"])
         shipment.sqlmodel_update(shipment_update, exclude_none=True)
 
         if shipment_update.estimated_delivery:

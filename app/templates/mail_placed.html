@@ -1,16 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-</head>
 <body>
-  <h1>Shipment Placed Successfully!</h1>
-  <p>Dear {{ client_name }},</p>
-  <p>Your shipment with tracking number <strong>{{ tracking_number }}</strong> from {{seller}} has been successfully placed.</p>
-  <p>Estimated Delivery Date: <strong>{{ estimated_delivery }} from {{deliver_partner}} is on its way!</strong></p>
-  <p>Thank you for choosing our services!</p>
-  <p>Best regards,<br/>The FastLearn Team</p>
+    <p>Hi 👋,</p>
+    <p>Your order with {{ seller }} is picked up by 
+    {{ partner }} and is on it's way to you. Use the below link
+    to track your order.</p>
+    <a href="http://localhost:8000/shipment/track?id={{ id }}"
+    style="color: #8a2be2;background-color: #e6d2f9;font-size: 16px;padding: .5em 1em;border-radius: .45em;margin-top: 1em;display: block;width: fit-content;"
+    >Track Now</a>
+    <br>
+    <p>Powered by FastShip</p>
 </body>
-</html>
