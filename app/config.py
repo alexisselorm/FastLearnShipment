@@ -36,6 +36,14 @@ class DatabaseSettings(BaseSettings):
     def POSTGRES_URL(self):
         return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
+    # @property
+    # def REDIS_URL(self):
+    #     return f"redis://{self.REDIS_USER}:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}"
+
+    @property  # LOCALHOST USE ONLY (User the docker image)
+    def REDIS_URL(self):
+        return "redis://localhost:6379"
+
 
 class SecuritySettings(BaseSettings):
     JWT_SECRET: str

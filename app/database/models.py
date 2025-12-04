@@ -47,7 +47,7 @@ class Shipment(SQLModel, table=True):
     timeline: list["ShipmentEvent"] = Relationship(back_populates="shipment",
                                                    sa_relationship_kwargs={"lazy": "selectin"})
 
-    review: "Review" | None = Relationship(
+    review: "Review" = Relationship(
         back_populates="shipment", sa_relationship_kwargs={"lazy": "selectin"})
 
     @property

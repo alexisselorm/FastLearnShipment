@@ -1,4 +1,4 @@
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,8 +14,8 @@ password_context = CryptContext(schemes=["bcrypt"])
 
 
 class SellerService(UserService):
-    def __init__(self, session: AsyncSession, tasks: BackgroundTasks):
-        super().__init__(Seller, session, tasks)
+    def __init__(self, session: AsyncSession):
+        super().__init__(Seller, session)
 
     async def get(self, user_id: str):
         result = await self.session.execute(select(Seller).where(Seller.id == user_id))

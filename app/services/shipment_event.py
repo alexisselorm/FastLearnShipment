@@ -5,15 +5,14 @@ from app.database.models import Shipment, ShipmentEvent
 from app.database.redis import add_shipment_verification_code
 from app.schemas.shipment import ShipmentStatus
 from app.services.base import BaseService
-from app.services.notification import NotificationService
 from app.config import app_settings
 from app.utils import generate_url_safe_token
+from app.worker.tasks import send_sms, send_templated_email
 
 
 class ShipmentEventService(BaseService):
-    def __init__(self, session, tasks):
+    def __init__(self, session):
         super().__init__(ShipmentEvent, session)
-        self.notification_service = NotificationService(tasks)
 
     async def add(self, shipment: Shipment, location: int = None, status: ShipmentStatus = None, description=None) -> ShipmentEvent:
         shipment_event = ShipmentEvent(
@@ -94,7 +93,7 @@ class ShipmentEventService(BaseService):
                 await add_shipment_verification_code(shipment.id, code)
 
                 if shipment.client_contact_phone:
-                    self.notification_service.send_sms(
+                    send_sms.delay(
                         to_number=shipment.client_contact_phone,
                         body=f"Your verification code for delivery of shipment {shipment.id} is {code}."
                     )
@@ -102,7 +101,7 @@ class ShipmentEventService(BaseService):
                     context["verification_code"] = code
             case _:
                 return  # No notification for other statuses
-        await self.notification_service.send_templated_email(
+        send_templated_email.delay(
             subject=subject,
             recipients=[shipment.client_contact_email],
             context=context,

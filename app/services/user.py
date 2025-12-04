@@ -4,9 +4,10 @@ from sqlalchemy import select
 from app.database.models import User
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.notification import NotificationService
+from app.worker.tasks import send_templated_email
+
 from .base import BaseService
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from passlib.context import CryptContext
 from app.config import app_settings
 
@@ -16,10 +17,9 @@ password_context = CryptContext(schemes=["bcrypt"])
 
 
 class UserService(BaseService):
-    def __init__(self, model: User, session: AsyncSession, tasks: BackgroundTasks):
+    def __init__(self, model: User, session: AsyncSession):
         self.session = session
         self.model = model
-        self.notification_service = NotificationService(tasks)
 
     async def _add_user(self, data: dict, router_prefix):
         user = self.model(
@@ -30,8 +30,8 @@ class UserService(BaseService):
         token = generate_url_safe_token(
             {"email": user.email, "id": str(new_user.id)})
 
-        await self.notification_service.send_templated_email(recipients=[user.email], subject="Verify your email",
-                                                             context={
+        send_templated_email.delay(recipients=[user.email], subject="Verify your email",
+                                   context={
             "username": user.name,
             "verification_url": f"http://{app_settings.APP_DOMAIN}/{router_prefix}/verify?token={token}"
         },
@@ -74,7 +74,7 @@ class UserService(BaseService):
             "id": str(user.id)
         }, salt="password-reset")
 
-        await self.notification_service.send_templated_email(
+        send_templated_email.delay(
             recipients=[user.email],
             subject="FastShip Account Password Reset",
             context={
