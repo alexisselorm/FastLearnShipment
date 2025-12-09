@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 from pydantic import EmailStr
 from sqlmodel import Field, Relationship, SQLModel, Column
-from app.schemas.enums import ShipmentStatus
+from app.schemas.enums import ShipmentStatus, TagNames
 from sqlalchemy.dialects import postgresql
 
 
@@ -50,9 +50,38 @@ class Shipment(SQLModel, table=True):
     review: "Review" = Relationship(
         back_populates="shipment", sa_relationship_kwargs={"lazy": "selectin"})
 
+    tags: list["Tag"] = Relationship(
+        back_populates="shipments",
+        link_model="ShipmentTag",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
+
     @property
     def status(self):
         return self.timeline[-1].status if len(self.timeline) > 0 else None
+
+
+class ShipmentTag(SQLModel, table=True):
+    __tablename__ = "shipment_tag"
+
+    shipment_id: UUID = Field(foreign_key="shipments.id", primary_key=True)
+    tag_id: UUID = Field(foreign_key="tags.id", primary_key=True)
+
+
+class Tag(SQLModel, table=True):
+    __tablename__ = "tags"
+
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    name: TagNames = Field(min_length=2, max_length=30,
+                           unique=True, default=TagNames.STANDARD)
+    instruction: str
+
+    shipments: list["Shipment"] = Relationship(
+        back_populates="tags",
+        link_model="ShipmentTag",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 
 class User(SQLModel):
