@@ -21,6 +21,13 @@ class ShipmentEvent(SQLModel, table=True):
                                         sa_relationship_kwargs={"lazy": "selectin"})
 
 
+class ShipmentTag(SQLModel, table=True):
+    __tablename__ = "shipment_tag"
+
+    shipment_id: UUID = Field(foreign_key="shipments.id", primary_key=True)
+    tag_id: UUID = Field(foreign_key="tags.id", primary_key=True)
+
+
 class Shipment(SQLModel, table=True):
     __tablename__ = "shipments"
 
@@ -52,20 +59,13 @@ class Shipment(SQLModel, table=True):
 
     tags: list["Tag"] = Relationship(
         back_populates="shipments",
-        link_model="ShipmentTag",
+        link_model=ShipmentTag,
         sa_relationship_kwargs={"lazy": "selectin"}
     )
 
     @property
     def status(self):
         return self.timeline[-1].status if len(self.timeline) > 0 else None
-
-
-class ShipmentTag(SQLModel, table=True):
-    __tablename__ = "shipment_tag"
-
-    shipment_id: UUID = Field(foreign_key="shipments.id", primary_key=True)
-    tag_id: UUID = Field(foreign_key="tags.id", primary_key=True)
 
 
 class Tag(SQLModel, table=True):
@@ -79,7 +79,7 @@ class Tag(SQLModel, table=True):
 
     shipments: list["Shipment"] = Relationship(
         back_populates="tags",
-        link_model="ShipmentTag",
+        link_model=ShipmentTag,
         sa_relationship_kwargs={"lazy": "selectin"}
     )
 
