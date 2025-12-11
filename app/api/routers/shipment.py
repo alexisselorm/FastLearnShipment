@@ -3,8 +3,9 @@ from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.api.dependencies import SellerDep, ShipmentServiceDep
+from app.api.dependencies import SellerDep, SessionDep, ShipmentServiceDep
 from app.database.models import DeliveryPartner
+from app.schemas.enums import TagNames
 from app.schemas.shipment import CreateShipment, GetShipment, ShipmentReview, UpdateShipment
 from app.utils import TEMPLATES_DIR
 
@@ -97,3 +98,29 @@ async def review_shipment(token: str, review_data: ShipmentReview, service: Ship
     await service.rate(token, review_data)
 
     return {"detail": "Review added successfully."}
+
+
+# Tag
+
+# Add tag to shipment
+@shipment_router.post("/tag", response_model=GetShipment)
+async def add_tag_to_shipment(id: UUID, tag: str, service: ShipmentServiceDep):
+    return await service.add_tag(id, tag)
+
+# Remove tag from shipment
+
+
+@shipment_router.delete("/tag", response_model=GetShipment)
+async def remove_tag_from_shipment(id: UUID, tag: str, service: ShipmentServiceDep):
+    return await service.remove_tag(id, tag)
+
+
+@shipment_router.get("/tagged", response_model=list[GetShipment])
+async def get_shipments_by_tag(tag_name: TagNames, session: SessionDep):
+    tags = await tag_name.tag(session)
+    if not tags:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No shipments found with the given tag"
+        )
+    return tags.shipments

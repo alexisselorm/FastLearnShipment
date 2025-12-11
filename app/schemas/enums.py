@@ -1,4 +1,6 @@
 from enum import Enum
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 
 class ShipmentStatus(str, Enum):
@@ -13,11 +15,16 @@ class TagNames(str, Enum):
     FRAGILE = "fragile"
     PERISHABLE = "perishable"
     HEAVY = "heavy"
-    GIFT = "gifts   "
-    electronics = "electronics"
+    GIFT = "gift"
+    ELECTRONICS = "electronics"
     DOCUMENTS = "documents"
     RETURN = "return"
     EXPRESS = "express"
     INTERNATIONAL = "international"
     TEMPERATURE_CONTROLLED = "temperature_controlled"
     STANDARD = "standard"
+
+    async def tag(self, session: AsyncSession):
+        from app.database.models import Tag
+        tag = await session.scalar(select(Tag).where(Tag.name == self.value))
+        return tag

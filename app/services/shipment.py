@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from app.database.models import DeliveryPartner, Review, Seller, Shipment
 from app.database.redis import get_shipment_verification_code
+from app.schemas.enums import TagNames
 from app.schemas.shipment import CreateShipment, ShipmentReview, ShipmentStatus, UpdateShipment
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -125,3 +126,27 @@ class ShipmentService(BaseService):
 
         self.session.add(new_review)
         await self.session.commit()
+
+    async def add_tag(self, id: UUID, tag_name: TagNames):
+        shipment = await self.get(id)
+
+        tag = await tag_name.tag(self.session)
+        if tag in shipment.tags:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tag already exists for this shipment"
+            )
+        shipment.tags.append(tag)
+        return await self._update(shipment)
+
+    async def delete_tag(self, id: UUID, tag_name: TagNames):
+        shipment = await self.get(id)
+
+        tag = await tag_name.tag(self.session)
+        if tag in shipment.tags:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tag already exists for this shipment"
+            )
+        shipment.tags.remove(tag)
+        return await self._update(shipment)

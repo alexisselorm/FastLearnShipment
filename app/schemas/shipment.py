@@ -6,7 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from app.database.models import ShipmentEvent
 from app.schemas.seller import ReadSeller
-from app.schemas.enums import ShipmentStatus
+from app.schemas.enums import ShipmentStatus, TagNames
 
 
 def random_destination():
@@ -25,10 +25,16 @@ class Shipment(BaseShipment):
     status: str = Field(default="placed")
 
 
+class TagRead(BaseModel):
+    name: TagNames
+    instruction: str
+
+
 class GetShipment(BaseShipment):
     timeline: list[ShipmentEvent]
     estimated_delivery: datetime
     seller: ReadSeller
+    tags: list[TagRead]
 
 
 class CreateShipment(BaseShipment):

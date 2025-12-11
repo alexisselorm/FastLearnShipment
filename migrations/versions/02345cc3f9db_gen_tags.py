@@ -6,7 +6,7 @@ Create Date: 2025-12-10 00:19:17.675078
 
 """
 from typing import Sequence, Union
-import uuid
+from uuid import uuid4
 
 from alembic import op
 import sqlalchemy as sa
@@ -181,47 +181,47 @@ def upgrade() -> None:
         tags_table,
         [
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "FRAGILE",
                 "instruction": "Handle with care, no stacking, cushion during transit.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "PERISHABLE",
                 "instruction": "Keep cool, minimize transit time, avoid direct sunlight.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "HEAVY",
                 "instruction": "Team lift recommended; secure to prevent shifting.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "GIFT",
                 "instruction": "Do not reveal contents; maintain packaging presentation.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "electronics",
                 "instruction": "Protect from moisture; avoid magnetic fields; keep upright.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "EXPRESS",
                 "instruction": "Priority handling; use fastest route; confirm delivery quickly.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "INTERNATIONAL",
                 "instruction": "Include customs docs; verify destination restrictions.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "TEMPERATURE_CONTROLLED",
                 "instruction": "Maintain within specified temperature band; monitor during transit.",
             },
             {
-                "id": uuid.uuid4(),
+                "id": uuid4(),
                 "name": "STANDARD",
                 "instruction": "Routine handling; follow default packaging guidelines.",
             },
