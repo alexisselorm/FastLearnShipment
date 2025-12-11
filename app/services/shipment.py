@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from app.core.exceptions import ClientNotAuthorizedException, EntityNotFoundException
 from app.database.models import DeliveryPartner, Review, Seller, Shipment
 from app.database.redis import get_shipment_verification_code
 from app.schemas.enums import TagNames
@@ -26,7 +27,11 @@ class ShipmentService(BaseService):
         return result.scalars().all()
 
     async def get(self, id: UUID) -> Shipment | None:
-        return await self._get(id)
+        shipment = await self._get(id)
+        if not shipment:
+            raise EntityNotFoundException()
+
+        return shipment
 
     async def add(self, shipment_create: CreateShipment, seller: Seller):
         shipment = Shipment(
@@ -59,10 +64,7 @@ class ShipmentService(BaseService):
             code = await get_shipment_verification_code(shipment.id)
 
             if not shipment_update.verification_code or str(shipment_update.verification_code) != str(code):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Client not authorized to receive the shipment without a valid verification code"
-                )
+                raise ClientNotAuthorizedException()
 
         update = shipment_update.model_dump(exclude_none=True,
                                             exclude=["verification_code"])

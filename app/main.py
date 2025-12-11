@@ -4,6 +4,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from scalar_fastapi import get_scalar_api_reference
 
+from app.core.exceptions import add_exception_handlers
+
 
 from .database.session import create_db_tables
 
@@ -32,6 +34,9 @@ app.add_middleware(
 )
 
 app.include_router(all_routers)
+
+
+add_exception_handlers(app)
 
 
 @app.get("/scalar", include_in_schema=False)
