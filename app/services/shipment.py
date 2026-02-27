@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from app.core.exceptions import ClientNotAuthorizedException, EntityNotFoundException
+from app.core.exceptions import ClientNotAuthorized, EntityNotFound
 from app.database.models import DeliveryPartner, Review, Seller, Shipment
 from app.database.redis import get_shipment_verification_code
 from app.schemas.enums import TagNames
@@ -29,7 +29,7 @@ class ShipmentService(BaseService):
     async def get(self, id: UUID) -> Shipment | None:
         shipment = await self._get(id)
         if not shipment:
-            raise EntityNotFoundException()
+            raise EntityNotFound()
 
         return shipment
 
@@ -64,7 +64,7 @@ class ShipmentService(BaseService):
             code = await get_shipment_verification_code(shipment.id)
 
             if not shipment_update.verification_code or str(shipment_update.verification_code) != str(code):
-                raise ClientNotAuthorizedException()
+                raise ClientNotAuthorized()
 
         update = shipment_update.model_dump(exclude_none=True,
                                             exclude=["verification_code"])
