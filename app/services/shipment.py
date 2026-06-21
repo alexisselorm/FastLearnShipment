@@ -44,8 +44,7 @@ class ShipmentService(BaseService):
         partner = await self.partner_service.assign_shipment(shipment)
         shipment.delivery_partner_id = partner.id
         new_shipment = await self._add(shipment)
-
-        new_event = await self.event_service.add(shipment=new_shipment.id,
+        new_event = await self.event_service.add(shipment=new_shipment,
                                                  location=seller.zip_code,
                                                  status=ShipmentStatus.placed,)
         shipment.timeline.append(new_event)

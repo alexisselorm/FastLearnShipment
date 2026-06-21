@@ -1,5 +1,5 @@
 from typing import Sequence
-from fastapi import BackgroundTasks, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy import select, any_
 from app.database.models import DeliveryPartner, Shipment
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +9,8 @@ from .user import UserService
 
 
 class DeliveryPartnerService(UserService):
-    def __init__(self, session: AsyncSession, tasks: BackgroundTasks):
-        super().__init__(DeliveryPartner, session, tasks)
+    def __init__(self, session: AsyncSession, ):
+        super().__init__(DeliveryPartner, session)
 
     async def get_partnes_by_zipcode(self, zipcode: str) -> Sequence[DeliveryPartner]:
         result = await self.session.scalars(

@@ -124,11 +124,11 @@ class DeliveryPartner(User, table=True):
 
     @property
     def active_shipments(self):
-        return [shipment for shipment in self.shipments if shipment.status != ShipmentStatus.delivered or shipment.status != ShipmentStatus.cancelled]
+        return [shipment for shipment in self.shipments if shipment.status != ShipmentStatus.delivered and shipment.status != ShipmentStatus.cancelled]
 
     @property
     def current_handling_capacity(self):
-        return self.max_handling_capacity - len(self.active_shipments())
+        return self.max_handling_capacity - len(self.active_shipments)
 
 
 class Review(SQLModel, table=True):

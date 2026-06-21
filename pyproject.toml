@@ -1,0 +1,24 @@
+[project]
+name = "fastlearnshipment"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.18.4",
+    "asgiref>=3.11.1",
+    "asyncpg>=0.31.0",
+    "bcrypt==4.0.1",
+    "celery>=5.6.3",
+    "email-validator>=2.3.0",
+    "fastapi-mail>=1.6.5",
+    "fastapi[all]>=0.138.0",
+    "passlib>=1.7.4",
+    "redis>=8.0.0",
+    "requests>=2.34.2",
+    "scalar-fastapi>=1.8.2",
+    "sqlalchemy[all]>=2.0.51",
+    "sqlmodel[all]>=0.0.38",
+    "tqdm>=4.68.3",
+    "twilio>=9.10.9",
+]

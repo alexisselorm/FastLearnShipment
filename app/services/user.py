@@ -22,6 +22,7 @@ class UserService(BaseService):
         self.model = model
 
     async def _add_user(self, data: dict, router_prefix):
+
         user = self.model(
             **data,
             password_hash=password_context.hash(data['password'])
