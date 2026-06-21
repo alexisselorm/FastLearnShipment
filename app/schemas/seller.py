@@ -10,6 +10,7 @@ class BaseSeller(BaseModel):
 
 class ReadSeller(BaseSeller):
     id: UUID
+    zip_code: int | None = None
 
 
 class LoginSeller(BaseModel):
@@ -19,3 +20,4 @@ class LoginSeller(BaseModel):
 
 class CreateSeller(BaseSeller):
     password: str
+    zip_code: int | None = None

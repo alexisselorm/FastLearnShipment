@@ -90,7 +90,7 @@ class ShipmentService(BaseService):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Delivered shipments cannot be cancelled"
             )
-        shipment.status = ShipmentStatus.cancelled
+
         new_event = await self.event_service.add(shipment=shipment,
                                                  status=ShipmentStatus.cancelled,
                                                  location=seller.zip_code,

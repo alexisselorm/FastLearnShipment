@@ -67,6 +67,11 @@ class Shipment(SQLModel, table=True):
     def status(self):
         return self.timeline[-1].status if len(self.timeline) > 0 else None
 
+    # Seter for status to create a new event when status is updated
+    # @status.setter
+    # def status(self, new_status: ShipmentStatus):
+    #     pass
+
 
 class Tag(SQLModel, table=True):
     __tablename__ = "tags"
