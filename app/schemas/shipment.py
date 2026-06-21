@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from app.database.models import ShipmentEvent
 from app.schemas.seller import ReadSeller
+from app.schemas.delivery_partner import ReadDeliveryPartner
 from app.schemas.enums import ShipmentStatus, TagNames
 
 
@@ -31,10 +32,13 @@ class TagRead(BaseModel):
 
 
 class GetShipment(BaseShipment):
+    id: UUID
+    status: ShipmentStatus
     timeline: list[ShipmentEvent]
     estimated_delivery: datetime
     seller: ReadSeller
     tags: list[TagRead]
+    delivery_partner: ReadDeliveryPartner | None = None
 
 
 class CreateShipment(BaseShipment):

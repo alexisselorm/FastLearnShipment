@@ -67,7 +67,7 @@ class ShipmentService(BaseService):
 
         update = shipment_update.model_dump(exclude_none=True,
                                             exclude=["verification_code"])
-        shipment.sqlmodel_update(shipment_update, exclude_none=True)
+        shipment.sqlmodel_update(update)
 
         if shipment_update.estimated_delivery:
             shipment.estimated_delivery = shipment_update.estimated_delivery

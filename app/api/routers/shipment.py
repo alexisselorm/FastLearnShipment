@@ -3,8 +3,7 @@ from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.api.dependencies import SellerDep, SessionDep, ShipmentServiceDep
-from app.database.models import DeliveryPartner
+from app.api.dependencies import DeliveryPartnerDep, SellerDep, SessionDep, ShipmentServiceDep
 from app.schemas.enums import TagNames
 from app.schemas.shipment import CreateShipment, GetShipment, ShipmentReview, UpdateShipment
 from app.utils import TEMPLATES_DIR
@@ -73,7 +72,7 @@ async def create_shipment(seller: SellerDep, body: CreateShipment, service: Ship
 
 # Update
 @shipment_router.patch("/", response_model=GetShipment)
-async def update_shipment(id: UUID, shipment_update: UpdateShipment, partner: DeliveryPartner, service: ShipmentServiceDep):
+async def update_shipment(id: UUID, shipment_update: UpdateShipment, partner: DeliveryPartnerDep, service: ShipmentServiceDep):
     update = shipment_update.model_dump(exclude_none=True)
     if not update:
         raise HTTPException(
