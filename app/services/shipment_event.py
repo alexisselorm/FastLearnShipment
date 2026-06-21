@@ -63,7 +63,7 @@ class ShipmentEventService(BaseService):
                     "shipment_id": shipment.id,
                     "seller": shipment.seller.name,
                     "delivery_partner": shipment.delivery_partner.name
-                },
+                }
                 template_name = "mail_placed.html"
 
             case ShipmentStatus.delivered:
@@ -74,14 +74,14 @@ class ShipmentEventService(BaseService):
                     "seller": shipment.seller.name,
                     "delivery_partner": shipment.delivery_partner.name,
                     "review_url": f"https://{app_settings.APP_DOMAIN}/shipment/review/?token={token}"
-                },
+                }
                 template_name = "mail_delivered.html"
             case ShipmentStatus.cancelled:
                 subject = "Your shipment has been cancelled ❌"
                 context = {
                     "seller": shipment.seller.name,
                     "partner": shipment.delivery_partner.name
-                },
+                }
                 template_name = "mail_cancelled.html"
 
             case ShipmentStatus.out_for_delivery:
@@ -89,7 +89,7 @@ class ShipmentEventService(BaseService):
                 context = {
                     "shipment_id": shipment.id,
                     "delivery_partner": shipment.delivery_partner.name
-                },
+                }
                 template_name = "mail_out_for_delivery.html"
                 code = randint(100_000, 999_999)
 
