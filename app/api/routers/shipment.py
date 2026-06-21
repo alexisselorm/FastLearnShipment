@@ -1,6 +1,5 @@
 from uuid import UUID
 from fastapi import APIRouter, HTTPException, Request, status
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.api.dependencies import DeliveryPartnerDep, SellerDep, SessionDep, ShipmentServiceDep
@@ -26,19 +25,7 @@ async def get_all_shipments(service: ShipmentServiceDep):
     return shipments
 
 
-@shipment_router.get("/{id}", response_model=GetShipment)
-async def shipment(id: UUID, service: ShipmentServiceDep):
-
-    shipment = await service.get(id)
-    if not shipment:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Given id does not exist"
-        )
-    return shipment
-
-
-# Tracking details of a shipment
+# Tracking details of a shipment (must be before /{id})
 @shipment_router.get("/track", response_model=None)
 async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep):
     shipment = await service.get(id)
@@ -54,11 +41,23 @@ async def track_shipment(request: Request, id: UUID, service: ShipmentServiceDep
     context["timeline"] = shipment.timeline
     context["status"] = shipment.status
 
-    return HTMLResponse(
+    return templates.TemplateResponse(
         request=request,
         name="track.html",
         context=context
     )
+
+
+@shipment_router.get("/{id}", response_model=GetShipment)
+async def shipment(id: UUID, service: ShipmentServiceDep):
+
+    shipment = await service.get(id)
+    if not shipment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Given id does not exist"
+        )
+    return shipment
 
 
 # Create a new shipment with
