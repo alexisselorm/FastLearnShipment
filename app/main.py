@@ -15,8 +15,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan_handler(app: FastAPI):
-    print("Server started")
     await create_db_tables()
+    print("Server started")
     yield
     print("Server stopped")
 
