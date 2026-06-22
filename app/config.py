@@ -14,6 +14,7 @@ class AppSettings(BaseSettings):
     APP_NAME: str = "FastLearn"
     APP_VERSION: str = "0.1.0"
     APP_DOMAIN: str = "localhost:8000"
+    OPENAI_API_KEY: str = ""
 
     model_config = _base_config
 

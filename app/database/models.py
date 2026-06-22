@@ -151,3 +151,26 @@ class Review(SQLModel, table=True):
     shipment: Shipment = Relationship(
         back_populates="review",
         sa_relationship_kwargs={"lazy": "selectin"})
+
+
+class ChatSession(SQLModel, table=True):
+    __tablename__ = "chat_sessions"
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    created_at: datetime = Field(sa_column=Column(
+        postgresql.TIMESTAMP(), default=datetime.now))
+    messages: list["ChatMessage"] = Relationship(
+        back_populates="session",
+        sa_relationship_kwargs={"lazy": "selectin"})
+
+
+class ChatMessage(SQLModel, table=True):
+    __tablename__ = "chat_messages"
+    id: UUID = Field(sa_column=Column(
+        type_=postgresql.UUID, primary_key=True, default=uuid4))
+    role: str
+    content: str
+    created_at: datetime = Field(sa_column=Column(
+        postgresql.TIMESTAMP(), default=datetime.now))
+    session_id: UUID = Field(foreign_key="chat_sessions.id")
+    session: ChatSession = Relationship(back_populates="messages")
