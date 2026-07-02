@@ -6,6 +6,19 @@ from app.services.factory import ServiceFactory
 # from langchain_core.messages import HumanMessage, SystemMessage, ToolMessage
 
 
+# @tool
+# async def lookup_shipments() -> str:
+#     """
+#     Get all
+#     """
+#     async with ServiceFactory() as service:
+#         shipment_details = await service.shipment.get(UUID(shipment_id))
+#         if shipment_details:
+#             return shipment_details
+#         else:
+#             return f"Shipment with ID: {shipment_id} not found"
+
+
 @tool
 async def lookup_shipment(shipment_id: str) -> str:
     """
